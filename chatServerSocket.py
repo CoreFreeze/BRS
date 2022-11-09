@@ -20,6 +20,7 @@ class chatTCPHandler(socketserver.BaseRequestHandler):
         return super().finish()
 
     def broadcast(self, message):
+        print(message)
         self.server.broadcast(message)
 
     def handle(self):
@@ -40,6 +41,7 @@ class chatTCPHandler(socketserver.BaseRequestHandler):
         while chatTCPHandler.running:
             try:
                 message = self.request.recv(1024).decode('utf-8')
+                print(message)
                 # 서버에 표시
                 splitedMessage = message.split('&')
                 if splitedMessage[0] == '1':
@@ -98,6 +100,9 @@ class ThreadedTCPServer(socketserver.ThreadingMixIn, socketserver.TCPServer):
         thread.daemon = True
         thread.start()
 
+    def setLocationList(self, locationList):
+        self.locationList = locationList
+
     def addClients(self, client):
         self.clients.append(client)
 
@@ -123,11 +128,11 @@ class ThreadedTCPServer(socketserver.ThreadingMixIn, socketserver.TCPServer):
 
     def leaveChatMessage(self, location):
         op = ['1']
-        if location == '아나부스':
+        if location == self.locationList[0]:
             index = 0
-        elif location == '상황실A':
+        elif location == self.locationList[1]:
             index = 1
-        elif location == '상황실B':
+        elif location == self.locationList[2]:
             index = 2
         else:
             return

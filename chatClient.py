@@ -5,8 +5,9 @@ HOST = '127.0.0.1'
 PORT = 9090
 
 class Client:
-    def __init__(self, location):
+    def __init__(self, location, locationIndex):
         self.location = location
+        self.locationIndex = locationIndex
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.status = 2
     
@@ -31,16 +32,8 @@ class Client:
             recieve_thread.daemon = True
             recieve_thread.start()
 
-    def getLocationIndex(self, location = None):
-        if location is None:
-            location = self.location
-        if location == '아나부스':
-            index = 0
-        elif location == '상황실A':
-            index = 1
-        elif location == '상황실B':
-            index = 2
-        return index
+    def getLocationIndex(self):
+        return self.locationIndex
 
     def write(self, message):
         if self.status == 0:

@@ -19,19 +19,25 @@ class MainWindow(QMainWindow):
         self.ui = Ui_MainWindow()
         self.ui.setupUi(self)
         loadStyle(self, self.ui)
-        self.ui.IPLabel.setText(socket.gethostbyname(socket.gethostname()))
+        
         self.readyDisplay = [self.ui.anaReady, self.ui.situRoomA, self.ui.situRoomB]
-        self.startServer()
-        self.ui.sendButton.clicked.connect(lambda: self.setMessage())
-        self.ui.lineEdit.returnPressed.connect(lambda: self.setMessage())
+        retData = loadCaster()
+        print(retData)
+        self.startServer(retData[0], int(retData[1]), retData[3])
+        self.ui.IPLabel.setText(socket.gethostbyname(socket.gethostname())+':'+str(retData[1]))
+        self.ui.label.setText(retData[3][0])
+        self.ui.label_5.setText(retData[3][1])
+        self.ui.label_7.setText(retData[3][2])
+        self.showLocation = retData[2]
+        self.ui.sendButton.clicked.connect(self.setMessage)
+        self.ui.lineEdit.returnPressed.connect(self.setMessage)
         self.show()
 
-    def startServer(self): 
-        chatTCPHandler.casterList = loadCaster()
-        chatTCPHandler.ui = self
+    def startServer(self, casterNameList, portNum, locationList): 
+        chatTCPHandler.casterList = casterNameList
         bridge = setMessageSig()
-        self.chat = ThreadedTCPServer((socket.gethostbyname(socket.gethostname()), PORT), chatTCPHandler)
-        
+        self.chat = ThreadedTCPServer((socket.gethostbyname(socket.gethostname()), int(portNum)), chatTCPHandler)
+        self.chat.setLocationList(locationList)
         self.chat.bridge = bridge
         bridge.messageSig.connect(self.showMessage)
         bridge.setReadySig.connect(self.setReady)
@@ -42,7 +48,7 @@ class MainWindow(QMainWindow):
     def setMessage(self):
         message = self.ui.lineEdit.text()
         now = datetime.datetime.now()
-        sendMessage = now.strftime("[%H:%M:%S]") + ' 주조' + ' : ' + message
+        sendMessage = now.strftime("[%H:%M:%S]") + ' '+ self.showLocation + ' : ' + message
         self.ui.lineEdit.clear()
         self.chat.broadcast(sendMessage)
         self.showMessage(sendMessage)
@@ -99,16 +105,42 @@ class casterNameList(QDialog):
         self.casterLabel = [self.ui.lineEdit, self.ui.lineEdit_2, self.ui.lineEdit_3, self.ui.lineEdit_4, \
             self.ui.lineEdit_5, self.ui.lineEdit_6, self.ui.lineEdit_7, self.ui.lineEdit_8, self.ui.lineEdit_9, \
                 self.ui.lineEdit_10, self.ui.lineEdit_11, self.ui.lineEdit_12 ]
-        casterList = loadCaster()
-        for index, caster in enumerate(casterList):
+        retData = loadCaster()
+        for index, caster in enumerate(retData[0]):
             self.casterLabel[index].setText(caster)
+        self.ui.portNumber.setText(str(retData[1]))
+        self.ui.position.setText(retData[2])
+        self.ui.LocationList.addItems(retData[3])
+
+        self.ui.addLocation.clicked.connect(self.addLocation)
+        self.ui.delLocation.clicked.connect(self.delLocation)
+
         self.show()
 
+    def addLocation(self):
+        location = self.ui.inputLocation.text()
+        if self.ui.LocationList.count() > 2:
+            return
+        self.ui.LocationList.addItem(location)
+        self.ui.inputLocation.clear()
+    
+    def delLocation(self):
+        self.ui.LocationList.takeItem(self.ui.LocationList.currentRow())
+        self.ui.LocationList.setCurrentRow(-1)
+    
     def saveCasterNameList(self):
         casterList = []
         for caster in self.casterLabel:
             casterList.append(caster.text())
-        saveCaster(casterList)
+        locationList = []
+        if self.ui.LocationList.count() == 3:
+            for _ in range(0,3):
+                locationList.append(self.ui.LocationList.takeItem(0).text())
+        else:
+            retData = loadCaster()
+            locationList = retData[3]
+        
+        saveCaster(casterList, self.ui.portNumber.text(), self.ui.position.text(), locationList)
 
     def accept(self):
         self.saveCasterNameList()

@@ -16,10 +16,17 @@ class MainWindow(QMainWindow):
         self.runningStatus = True
         loadStyle(self, self.ui)
         Settings = loadSettings()
-        self.ui.locationDisplay.setText(Settings[1])
-        self.readyList = ['아나부스', '상황실A', '상황실B']
-        self.myLocation = self.readyList.index(Settings[1])
-        self.chat = Client(Settings[1])
+        try:
+            self.ui.locationDisplay.setText(Settings[2])
+            self.readyList = Settings[3]
+            self.myLocation = self.readyList.index(Settings[2])
+            self.ui.label_2.setText(self.readyList[0])
+            self.ui.label_3.setText(self.readyList[1])
+            self.ui.label_4.setText(self.readyList[2])
+        except:
+            self.openSettings()
+            Settings = loadSettings()
+        self.chat = Client(Settings[2], self.myLocation)
         bridge = setConnectErrorSig()
         bridge2 = setMessageSig()
         self.chat.bridge = bridge
@@ -30,15 +37,16 @@ class MainWindow(QMainWindow):
         bridge2.setReadySig.connect(self.setReady)
         bridge2.setBasicSig.connect(self.basicSet)
         bridge2.setSuspendSig.connect(self.suspendAll)
-        self.chat.connect(Settings[0], 9090)
+
+        self.chat.connect(Settings[0], int(Settings[1]))
         self.chat.start()
         self.casterReady = [self.ui.anaReady, self.ui.situRoomA, self.ui.situRoomB]
-        self.ui.userSelectButton.clicked.connect(lambda: self.setCaster())
-        self.ui.readyButton.clicked.connect(lambda: self.ready())
+        self.ui.userSelectButton.clicked.connect(self.setCaster)
+        self.ui.readyButton.clicked.connect(self.ready)
         self.readyStatus = False
         self.casterStatus = False
-        self.ui.sendButton.clicked.connect(lambda: self.setMessage())
-        self.ui.lineEdit.returnPressed.connect(lambda: self.setMessage())
+        self.ui.sendButton.clicked.connect(self.setMessage)
+        self.ui.lineEdit.returnPressed.connect(self.setMessage)
 
         self.createActions()
         self.createTrayIcon()
@@ -93,8 +101,11 @@ class MainWindow(QMainWindow):
 
     def keyPressEvent(self, e):
         if e.key() == Qt.Key_F2:
-            settingsWindow = Settings()
-            settingsWindow.exec()
+            self.openSettings()
+
+    def openSettings(self):
+        settingsWindow = Settings()
+        settingsWindow.exec()
 
     def setCasters(self, casters):
         self.ui.userSelectBox.addItems(casters)
@@ -138,6 +149,7 @@ class MainWindow(QMainWindow):
     @Slot(str)
     def showMessage(self, message):
         self.ui.textBrowser.appendPlainText(message)
+        QApplication.alert(self)
         splitedMessage = message.split()
         if len(splitedMessage) == 4:
             if splitedMessage[1] != self.ui.userSelectBox.currentText():
@@ -185,16 +197,48 @@ class Settings(QDialog):
         self.ui.setupUi(self)
         Settings = loadSettings()
         self.ui.lineEdit.setText(Settings[0])
-        locations = ['아나부스','상황실A','상황실B']
-        self.ui.comboBox.addItems(locations)
-        try:
-            self.ui.comboBox.setCurrentIndex(locations.index(Settings[1]))
-        except:
-            self.ui.comboBox.setCurrentIndex(0)
+        self.ui.lineEdit_2.setText(str(Settings[1]))
+        self.ui.LocationList.addItems(Settings[3])
+        self.changeLocationBoxList(Settings[2])
+
+        self.ui.addLocation.clicked.connect(self.addLocation)
+        self.ui.delLocation.clicked.connect(self.delLocation)
+
         self.show()
 
+    def addLocation(self):
+        location = self.ui.inputLocation.text()
+        if self.ui.LocationList.count() > 2:
+            return
+        self.ui.LocationList.addItem(location)
+        self.ui.inputLocation.clear()
+
+        self.changeLocationBoxList()
+    
+    def delLocation(self):
+        self.ui.LocationList.takeItem(self.ui.LocationList.currentRow())
+        self.ui.LocationList.setCurrentRow(-1)
+
+    def changeLocationBoxList(self, location = None):
+        locations = []
+        for index in range(0, self.ui.LocationList.count()):
+            locations.append(self.ui.LocationList.item(index).text())
+        self.ui.comboBox.clear()
+        self.ui.comboBox.addItems(locations)
+        try:
+            self.ui.comboBox.setCurrentIndex(locations.index(location))
+        except:
+            self.ui.comboBox.setCurrentIndex(-1)
+
     def saveSettings(self):
-        saveSettings(self.ui.lineEdit.text(), self.ui.comboBox.currentText())
+        locationList = []
+        if self.ui.LocationList.count() == 3:
+            for _ in range(0,3):
+                locationList.append(self.ui.LocationList.takeItem(0).text())
+        else:
+            retData = loadSettings()
+            locationList = retData[3]
+        saveSettings(self.ui.lineEdit.text(), self.ui.lineEdit_2.text(), self.ui.comboBox.currentText(), locationList)
 
     def accept(self):
         self.saveSettings()

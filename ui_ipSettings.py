@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 ################################################################################
-## Form generated from reading UI file 'ipSettingsNFgEQS.ui'
+## Form generated from reading UI file 'ipSettingsGZesoc.ui'
 ##
 ## Created by: Qt User Interface Compiler version 5.15.2
 ##
@@ -18,11 +18,11 @@ class Ui_Dialog(object):
         if not Dialog.objectName():
             Dialog.setObjectName(u"Dialog")
         Dialog.setWindowModality(Qt.ApplicationModal)
-        Dialog.resize(400, 256)
+        Dialog.resize(500, 352)
         Dialog.setStyleSheet(u"#Dialog {\n"
 "	background-color: #1f232a;\n"
 "}\n"
-"#label {\n"
+"#label, #label_2 {\n"
 "	color: white;\n"
 "}")
         self.verticalLayout = QVBoxLayout(Dialog)
@@ -48,12 +48,35 @@ class Ui_Dialog(object):
 
         self.lineEdit = QLineEdit(self.frame_2)
         self.lineEdit.setObjectName(u"lineEdit")
+        self.lineEdit.setMaximumSize(QSize(300, 16777215))
         self.lineEdit.setFont(font)
 
         self.horizontalLayout.addWidget(self.lineEdit)
 
 
         self.verticalLayout.addWidget(self.frame_2)
+
+        self.frame_4 = QFrame(Dialog)
+        self.frame_4.setObjectName(u"frame_4")
+        self.frame_4.setFrameShape(QFrame.StyledPanel)
+        self.frame_4.setFrameShadow(QFrame.Raised)
+        self.horizontalLayout_4 = QHBoxLayout(self.frame_4)
+        self.horizontalLayout_4.setObjectName(u"horizontalLayout_4")
+        self.label_2 = QLabel(self.frame_4)
+        self.label_2.setObjectName(u"label_2")
+        self.label_2.setFont(font)
+
+        self.horizontalLayout_4.addWidget(self.label_2)
+
+        self.lineEdit_2 = QLineEdit(self.frame_4)
+        self.lineEdit_2.setObjectName(u"lineEdit_2")
+        self.lineEdit_2.setMaximumSize(QSize(300, 16777215))
+        self.lineEdit_2.setFont(font)
+
+        self.horizontalLayout_4.addWidget(self.lineEdit_2)
+
+
+        self.verticalLayout.addWidget(self.frame_4)
 
         self.frame = QFrame(Dialog)
         self.frame.setObjectName(u"frame")
@@ -72,6 +95,40 @@ class Ui_Dialog(object):
 
         self.verticalLayout.addWidget(self.frame)
 
+        self.frame_3 = QFrame(Dialog)
+        self.frame_3.setObjectName(u"frame_3")
+        self.frame_3.setFrameShape(QFrame.StyledPanel)
+        self.frame_3.setFrameShadow(QFrame.Raised)
+        self.verticalLayout_2 = QVBoxLayout(self.frame_3)
+        self.verticalLayout_2.setObjectName(u"verticalLayout_2")
+        self.LocationList = QListWidget(self.frame_3)
+        self.LocationList.setObjectName(u"LocationList")
+
+        self.verticalLayout_2.addWidget(self.LocationList)
+
+        self.horizontalLayout_3 = QHBoxLayout()
+        self.horizontalLayout_3.setObjectName(u"horizontalLayout_3")
+        self.inputLocation = QLineEdit(self.frame_3)
+        self.inputLocation.setObjectName(u"inputLocation")
+
+        self.horizontalLayout_3.addWidget(self.inputLocation)
+
+        self.addLocation = QPushButton(self.frame_3)
+        self.addLocation.setObjectName(u"addLocation")
+
+        self.horizontalLayout_3.addWidget(self.addLocation)
+
+        self.delLocation = QPushButton(self.frame_3)
+        self.delLocation.setObjectName(u"delLocation")
+
+        self.horizontalLayout_3.addWidget(self.delLocation)
+
+
+        self.verticalLayout_2.addLayout(self.horizontalLayout_3)
+
+
+        self.verticalLayout.addWidget(self.frame_3)
+
         self.buttonBox = QDialogButtonBox(Dialog)
         self.buttonBox.setObjectName(u"buttonBox")
         self.buttonBox.setOrientation(Qt.Horizontal)
@@ -84,11 +141,17 @@ class Ui_Dialog(object):
         self.buttonBox.accepted.connect(Dialog.accept)
         self.buttonBox.rejected.connect(Dialog.reject)
 
+        self.addLocation.setDefault(True)
+
+
         QMetaObject.connectSlotsByName(Dialog)
     # setupUi
 
     def retranslateUi(self, Dialog):
         Dialog.setWindowTitle(QCoreApplication.translate("Dialog", u"Settings", None))
         self.label.setText(QCoreApplication.translate("Dialog", u"IP", None))
+        self.label_2.setText(QCoreApplication.translate("Dialog", u"PORT", None))
+        self.addLocation.setText(QCoreApplication.translate("Dialog", u"\uc785\ub825", None))
+        self.delLocation.setText(QCoreApplication.translate("Dialog", u"\uc0ad\uc81c", None))
     # retranslateUi
 

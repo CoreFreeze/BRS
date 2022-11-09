@@ -18,10 +18,10 @@ class MainWindow(QMainWindow):
         loadStyle(self, self.ui)
         self.runningStatus = True
         Settings = loadSettings()
-        self.myLocation = Settings[1]
+        self.myLocation = Settings[2]
         self.ui.IPLabel.setText('')
 
-        self.chat = Client(Settings[1])
+        self.chat = Client(Settings[2])
         bridge = setConnectErrorSig()
         bridge2 = setMessageSig()
         self.chat.bridge = bridge
@@ -32,11 +32,11 @@ class MainWindow(QMainWindow):
         bridge2.setReadySig.connect(self.setReady)
         bridge2.setBasicSig.connect(self.basicSet)
         bridge2.setSuspendSig.connect(self.suspendAll)
-        self.chat.connect(Settings[0], 9090)
+        self.chat.connect(Settings[0], Settings[1])
         self.chat.start()
         self.casterReady = [self.ui.anaReady, self.ui.situRoomA, self.ui.situRoomB]
-        self.ui.sendButton.clicked.connect(lambda: self.setMessage())
-        self.ui.lineEdit.returnPressed.connect(lambda: self.setMessage())
+        self.ui.sendButton.clicked.connect(self.setMessage)
+        self.ui.lineEdit.returnPressed.connect(self.setMessage)
         self.ui.onTopCheckBox.toggled.connect(self.setAlwaysOnTop)
 
     def setAlwaysOnTop(self, value):
@@ -132,16 +132,48 @@ class Settings(QDialog):
         self.setWindowFlag(QtCore.Qt.WindowStaysOnTopHint, True)
         Settings = loadSettings()
         self.ui.lineEdit.setText(Settings[0])
-        locations = ['1부조','2부조','편성제작국','교통정보상황실', 'DJ Room']
-        self.ui.comboBox.addItems(locations)
-        try:
-            self.ui.comboBox.setCurrentIndex(locations.index(Settings[1]))
-        except:
-            self.ui.comboBox.setCurrentIndex(0)
+        self.ui.lineEdit_2.setText(str(Settings[1]))
+        self.ui.LocationList.addItems(Settings[3])
+        self.changeLocationBoxList(Settings[2])
+
+        self.ui.addLocation.clicked.connect(self.addLocation)
+        self.ui.delLocation.clicked.connect(self.delLocation)
+
         self.show()
 
+    def addLocation(self):
+        location = self.ui.inputLocation.text()
+        if self.ui.LocationList.count() > 2:
+            return
+        self.ui.LocationList.addItem(location)
+        self.ui.inputLocation.clear()
+
+        self.changeLocationBoxList()
+    
+    def delLocation(self):
+        self.ui.LocationList.takeItem(self.ui.LocationList.currentRow())
+        self.ui.LocationList.setCurrentRow(-1)
+
+    def changeLocationBoxList(self, location = None):
+        locations = []
+        for index in range(0, self.ui.LocationList.count()):
+            locations.append(self.ui.LocationList.item(index).text())
+        self.ui.comboBox.clear()
+        self.ui.comboBox.addItems(locations)
+        try:
+            self.ui.comboBox.setCurrentIndex(locations.index(location))
+        except:
+            self.ui.comboBox.setCurrentIndex(-1)
+
     def saveSettings(self):
-        saveSettings(self.ui.lineEdit.text(), self.ui.comboBox.currentText())
+        locationList = []
+        if self.ui.LocationList.count() == 3:
+            for _ in range(0,3):
+                locationList.append(self.ui.LocationList.takeItem(0).text())
+        else:
+            retData = loadSettings()
+            locationList = retData[3]
+        saveSettings(self.ui.lineEdit.text(), self.ui.lineEdit_2.text(), self.ui.comboBox.currentText(), locationList)
 
     def accept(self):
         self.saveSettings()
