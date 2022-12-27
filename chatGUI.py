@@ -10,8 +10,11 @@ import ui_casterName
 import ui_closeWindow
 import datetime
 import threading
+import logging
+import logging.handlers
 
 PORT = 9090
+LOG_FILENAME = 'BRS_Chat_Log.out'
 
 class MainWindow(QMainWindow):
     def __init__(self):
@@ -19,10 +22,15 @@ class MainWindow(QMainWindow):
         self.ui = Ui_MainWindow()
         self.ui.setupUi(self)
         loadStyle(self, self.ui)
-        
+        self.logger = logging.getLogger('MyLogger')
+        self.logger.setLevel(logging.INFO)
+        handler = logging.handlers.TimedRotatingFileHandler(LOG_FILENAME, when='midnight', backupCount=30)
+        bf = logging.Formatter('{message}', style='{')
+        handler.suffix = 'log-%Y%m%d'
+        handler.setFormatter(bf)
+        self.logger.addHandler(handler)
         self.readyDisplay = [self.ui.anaReady, self.ui.situRoomA, self.ui.situRoomB]
         retData = loadCaster()
-        print(retData)
         self.startServer(retData[0], int(retData[1]), retData[3])
         self.ui.IPLabel.setText(socket.gethostbyname(socket.gethostname())+':'+str(retData[1]))
         self.ui.label.setText(retData[3][0])
@@ -56,6 +64,7 @@ class MainWindow(QMainWindow):
     @Slot(str)
     def showMessage(self, message):
         self.ui.textBrowser.appendPlainText(message)
+        self.logger.info(message)
 
     @Slot(int, bool)
     def setReady(self, location, value):

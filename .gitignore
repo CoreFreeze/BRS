@@ -2,3 +2,7 @@ __pycache__/
 build/
 chatPy2_env/
 dist/
+chatGUI.spec
+chatGUI2.spec
+BRS_Chat_Log.out.log-20221207
+BRS_Chat_Log.out
